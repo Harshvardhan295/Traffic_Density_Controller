@@ -1,0 +1,600 @@
+/* Reset default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Modern color palette */
+:root {
+    --primary-bg: #1a1a1a;
+    --secondary-bg: #2d2d2d;
+    --accent-color: #ff4500;
+    --text-primary: #ffffff;
+    --text-secondary: #ffcc00;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --road-color: #333333;
+    --road-marking: #ffffff;
+    --intersection-size: 150px;
+    --road-width: 60px;
+}
+
+/* Base styles */
+html {
+    font-size: 16px;
+}
+
+body {
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--primary-bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* Main container */
+.traffic-control-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Intersection layout */
+.intersection-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-gap: 0.5rem;
+    position: relative;
+    margin-bottom: 2rem;
+    min-height: 600px;
+}
+
+/* Road styling */
+.road {
+    position: absolute;
+    background: var(--road-color);
+    z-index: 1;
+}
+
+.road-horizontal {
+    height: var(--road-width);
+    width: 100%;
+    left: 0;
+    right: 0;
+}
+
+.road-vertical {
+    width: var(--road-width);
+    height: 100%;
+    top: 0;
+    bottom: 0;
+}
+
+.road-north {
+    top: 0;
+    bottom: auto;
+    height: calc(50% - var(--road-width)/2);
+}
+
+.road-south {
+    bottom: 0;
+    top: auto;
+    height: calc(50% - var(--road-width)/2);
+}
+
+.road-east {
+    right: 0;
+    left: auto;
+    width: calc(50% - var(--road-width)/2);
+}
+
+.road-west {
+    left: 0;
+    right: auto;
+    width: calc(50% - var(--road-width)/2);
+}
+
+/* Road connections to intersection */
+.road-connection {
+    position: absolute;
+    background: var(--road-color);
+    z-index: 1;
+}
+
+.road-connection-north {
+    width: var(--road-width);
+    height: calc(var(--intersection-size)/2);
+    top: calc(50% - var(--intersection-size)/2);
+    left: calc(50% - var(--road-width)/2);
+}
+
+.road-connection-south {
+    width: var(--road-width);
+    height: calc(var(--intersection-size)/2);
+    bottom: calc(50% - var(--intersection-size)/2);
+    left: calc(50% - var(--road-width)/2);
+}
+
+.road-connection-east {
+    width: calc(var(--intersection-size)/2);
+    height: var(--road-width);
+    right: calc(50% - var(--intersection-size)/2);
+    top: calc(50% - var(--road-width)/2);
+}
+
+.road-connection-west {
+    width: calc(var(--intersection-size)/2);
+    height: var(--road-width);
+    left: calc(50% - var(--intersection-size)/2);
+    top: calc(50% - var(--road-width)/2);
+}
+
+.road-marking {
+    position: absolute;
+    background: var(--road-marking);
+}
+
+.road-marking-horizontal {
+    height: 2px;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.road-marking-vertical {
+    width: 2px;
+    height: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.road-marking-dashed {
+    background: repeating-linear-gradient(
+        to right,
+        var(--road-marking) 0,
+        var(--road-marking) 10px,
+        transparent 10px,
+        transparent 20px
+    );
+}
+
+.road-marking-dashed-vertical {
+    background: repeating-linear-gradient(
+        to bottom,
+        var(--road-marking) 0,
+        var(--road-marking) 10px,
+        transparent 10px,
+        transparent 20px
+    );
+}
+
+/* Lane styling */
+.lane {
+    background: var(--secondary-bg);
+    border: 2px solid var(--accent-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    min-height: 150px;
+    z-index: 2;
+}
+
+.north-lane {
+    grid-column: 2;
+    grid-row: 1;
+    margin-bottom: 30px;
+}
+
+.south-lane {
+    grid-column: 2;
+    grid-row: 3;
+    margin-top: 30px;
+}
+
+.east-lane {
+    grid-column: 3;
+    grid-row: 2;
+    margin-left: 30px;
+}
+
+.west-lane {
+    grid-column: 1;
+    grid-row: 2;
+    margin-right: 30px;
+}
+
+.lane:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(255, 69, 0, 0.2);
+}
+
+/* Lane header */
+.lane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.lane-header h2 {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Traffic light styling */
+.traffic-light {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: #333;
+    padding: 0.5rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.light {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 0.25rem;
+    opacity: 0.3;
+    transition: var(--transition);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.light.red { background-color: #ff0000; }
+.light.yellow { background-color: #ffff00; }
+.light.green { background-color: #00ff00; }
+.light.active { 
+    opacity: 1; 
+    box-shadow: 0 0 15px currentColor, inset 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+/* Upload box styling */
+.upload-box {
+    width: 100%;
+    min-height: 80px;
+    max-height: 80px;
+    border: 2px dashed var(--accent-color);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+.upload-box:hover {
+    background: rgba(255, 69, 0, 0.1);
+    border-color: #ff5722;
+}
+
+.upload-box img {
+    max-width: 100%;
+    max-height: 80px;
+    object-fit: contain;
+    border-radius: calc(var(--border-radius) - 4px);
+}
+
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0.75rem;
+}
+
+.upload-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Timer styling */
+.countdown-timer {
+    background: var(--primary-bg);
+    color: var(--text-secondary);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.timer-icon {
+    font-size: 1rem;
+}
+
+.timer-value {
+    font-size: 1rem;
+}
+
+/* Intersection styling */
+.intersection {
+    grid-column: 2;
+    grid-row: 2;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+/* API Status Indicators */
+.api-status {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    z-index: 4;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.api-status.loading {
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--text-primary);
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.api-status.error {
+    background: rgba(255, 0, 0, 0.7);
+    color: white;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.status-icon {
+    font-size: 1.2rem;
+}
+
+.status-text {
+    font-weight: 500;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Button styling */
+.control-button {
+    background: #000000;
+    color: var(--text-primary);
+    border: none;
+    padding: 0.8rem 0.8rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 3;
+    box-shadow: 0 8px 8px rgba(0, 0, 0, 0.3);
+    font-size: 1.2rem;
+    min-width: 200px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.control-button:hover:not(:disabled) {
+    background: #2d171730;
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.control-button:disabled {
+    background: #666;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Traffic signal styling */
+.traffic-signal {
+    position: absolute;
+    width: 30px;
+    height: 80px;
+    background: #222;
+    border-radius: 5px;
+    z-index: 3;
+}
+
+.traffic-signal-north {
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.traffic-signal-south {
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.traffic-signal-east {
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.traffic-signal-west {
+    left: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.traffic-signal::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color);
+    animation: pulse 2s infinite;
+}
+
+.traffic-signal-north::before {
+    top: 10px;
+    left: 5px;
+}
+
+.traffic-signal-south::before {
+    bottom: 10px;
+    left: 5px;
+}
+
+.traffic-signal-east::before {
+    right: 5px;
+    top: 10px;
+}
+
+.traffic-signal-west::before {
+    left: 5px;
+    top: 10px;
+}
+
+/* Missing data message */
+.missing-data-message {
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid #ff0000;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-top: 1rem;
+    text-align: center;
+    color: #ff6666;
+}
+
+.missing-data-message p {
+    margin: 0.25rem 0;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    .intersection-container {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto auto;
+        min-height: auto;
+    }
+    
+    .north-lane {
+        grid-column: 1 / span 2;
+        grid-row: 1;
+        margin-bottom: 30px;
+    }
+    
+    .west-lane {
+        grid-column: 1;
+        grid-row: 2;
+        margin-right: 30px;
+    }
+    
+    .intersection {
+        grid-column: 2;
+        grid-row: 2;
+        margin: 30px;
+        min-height: calc(var(--intersection-size) * 0.8);
+        min-width: calc(var(--intersection-size) * 0.8);
+    }
+    
+    .east-lane {
+        grid-column: 1;
+        grid-row: 3;
+        margin-left: 30px;
+    }
+    
+    .south-lane {
+        grid-column: 2;
+        grid-row: 3;
+        margin-top: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .traffic-control-container {
+        padding: 0.5rem;
+    }
+    
+    .intersection-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto auto;
+        gap: 0.75rem;
+    }
+    
+    .north-lane, .south-lane, .east-lane, .west-lane {
+        grid-column: 1;
+        margin: 15px 0;
+    }
+    
+    .north-lane {
+        grid-row: 1;
+    }
+    
+    .west-lane {
+        grid-row: 2;
+    }
+    
+    .intersection {
+        grid-column: 1;
+        grid-row: 3;
+        min-height: calc(var(--intersection-size) * 0.7);
+        min-width: calc(var(--intersection-size) * 0.7);
+        margin: 15px;
+    }
+    
+    .east-lane {
+        grid-row: 4;
+    }
+    
+    .south-lane {
+        grid-row: 5;
+    }
+    
+    .lane {
+        width: 100%;
+        min-height: 140px;
+    }
+    
+    .lane-header h2 {
+        font-size: 1rem;
+    }
+    
+    .light {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .control-button {
+        font-size: 1.1rem;
+        min-width: 130px;
+    }
+}
