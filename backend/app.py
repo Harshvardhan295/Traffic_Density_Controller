@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 # Configure CORS to allow requests from the frontend
-CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"], "allow_headers": ["Content-Type"]}})
+CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"], "allow_headers": ["Content-Type", "Accept"]}})
 
 # Configure upload folder
 UPLOAD_FOLDER = "uploads"
@@ -52,18 +52,21 @@ def predict_density(image_path):
     """Predict traffic density using the ML model."""
     if model is None:
         logger.error("ML model not loaded")
-        return 0.5  # Default value if model is not loaded
+        return 0.1  # Lower default value if model is not loaded
         
     image_data = process_image(image_path)
     if image_data is None:
-        return 0.5  # Default value if image processing failed
+        return 0.1  # Lower default value if image processing failed
         
     try:
         density = model.predict(image_data)[0]
+        # Ensure density is between 0 and 1
+        density = max(0.1, min(1.0, density))
+        logger.info(f"Density prediction for {image_path}: {density}")
         return density
     except Exception as e:
         logger.error(f"Error predicting density: {str(e)}")
-        return 0.5  # Default value if prediction failed
+        return 0.1  # Lower default value if prediction failed
 
 @app.route("/")
 def home():
@@ -78,7 +81,12 @@ def home():
 def upload_images():
     """Handles image uploads, predicts density, and returns sorted lanes with signal durations."""
     if request.method == "OPTIONS":
-        return "", 204
+        # Handle preflight request
+        response = jsonify({"status": "ok"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Accept')
+        response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
+        return response, 204
         
     if "images" not in request.files:
         logger.warning("No images found in request")
@@ -132,13 +140,26 @@ def upload_images():
             lane: int(20 + (density / max_density) * 160) for lane, density in lane_densities.items()
         }
 
-        logger.info(f"Successfully processed traffic data: {lane_durations}")
-        
-        return jsonify({
+        # Log the sorted lanes and their durations
+        logger.info(f"Sorted lanes by density: {sorted_lanes}")
+        logger.info(f"Lane durations: {lane_durations}")
+        logger.info(f"Highest density lane: {sorted_lanes[0][0] if sorted_lanes else 'None'}")
+
+        # Ensure all lanes have a minimum duration
+        min_duration = 20
+        for lane in ["North", "South", "East", "West"]:
+            if lane not in lane_durations or lane_durations[lane] < min_duration:
+                lane_durations[lane] = min_duration
+
+        response = jsonify({
             "status": "success",
             "sorted_lanes": [lane for lane, _ in sorted_lanes],
             "lane_durations": lane_durations
         })
+        
+        # Add CORS headers to the response
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
         
     except Exception as e:
         logger.error(f"Error processing upload: {str(e)}")
