@@ -22,6 +22,8 @@ const TrafficControl = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [activeLane, setActiveLane] = useState(null); // Track which lane is currently active
   const [originalDurations, setOriginalDurations] = useState({}); // Store original durations
+  const [clearedLanes, setClearedLanes] = useState([]); // Track which lanes have been cleared
+  const [notification, setNotification] = useState(null); // For showing lane cleared messages
 
   const handleUpload = (event, lane) => {
     const file = event.target.files[0];
@@ -39,6 +41,8 @@ const TrafficControl = () => {
     setIsProcessing(true);
     setApiStatus("loading");
     setErrorMessage("");
+    setClearedLanes([]); // Reset cleared lanes
+    setNotification(null); // Reset notification
     fetchDurations();
   };
 
@@ -51,16 +55,33 @@ const TrafficControl = () => {
     });
 
     try {
-      // Show loading state
       setApiStatus("loading");
       
-      // API call to backend
-      const response = await fetch("http://127.0.0.1:5000/upload", {
-        method: "POST",
-        body: formData,
-      });
+      // Use the correct API endpoint URL - try both localhost and 127.0.0.1
+      let response;
+      try {
+        response = await fetch("http://localhost:5000/upload", {
+          method: "POST",
+          body: formData,
+          headers: {
+            'Accept': 'application/json',
+          },
+          mode: 'cors',
+          credentials: 'omit'
+        });
+      } catch (error) {
+        console.log("Failed to connect to localhost, trying 127.0.0.1...");
+        response = await fetch("http://127.0.0.1:5000/upload", {
+          method: "POST",
+          body: formData,
+          headers: {
+            'Accept': 'application/json',
+          },
+          mode: 'cors',
+          credentials: 'omit'
+        });
+      }
 
-      // Check if response is ok
       if (!response.ok) {
         throw new Error(`Server responded with status: ${response.status}`);
       }
@@ -70,29 +91,34 @@ const TrafficControl = () => {
       // Store original durations
       setOriginalDurations(data.lane_durations);
       
-      // Initialize timers with all lanes at zero except the active one
-      const initialTimers = {};
-      Object.keys(data.lane_durations).forEach(lane => {
-        initialTimers[lane] = 0;
-      });
+      // Initialize timers with all lanes at zero
+      const initialTimers = {
+        North: 0,
+        East: 0,
+        South: 0,
+        West: 0
+      };
       
-      // Update traffic lights (Green for the lane with the highest duration)
-      const sortedLanes = Object.entries(data.lane_durations).sort((a, b) => b[1] - a[1]);
+      // Update traffic lights (all red initially)
       const updatedLights = {
         North: "red",
         East: "red",
         South: "red",
-        West: "red",
+        West: "red"
       };
 
-      if (sortedLanes.length > 0) {
-        // Set the lane with highest density to green
-        const highestDensityLane = sortedLanes[0][0];
+      console.log("Sorted lanes by density:", data.sorted_lanes);
+      console.log("Lane durations:", data.lane_durations);
+
+      if (data.sorted_lanes && data.sorted_lanes.length > 0) {
+        const highestDensityLane = data.sorted_lanes[0];
         updatedLights[highestDensityLane] = "green";
-        setActiveLane(highestDensityLane); // Set the active lane
+        setActiveLane(highestDensityLane);
         
         // Set the timer for the active lane only
         initialTimers[highestDensityLane] = data.lane_durations[highestDensityLane];
+        
+        console.log(`Activating lane: ${highestDensityLane} with duration: ${data.lane_durations[highestDensityLane]}`);
       }
 
       setTimers(initialTimers);
@@ -101,7 +127,6 @@ const TrafficControl = () => {
       setTimerActive(true);
       setApiStatus("success");
       
-      // Log success for debugging
       console.log("Traffic data processed successfully:", data);
       
     } catch (error) {
@@ -122,23 +147,41 @@ const TrafficControl = () => {
         setTimers(prevTimers => {
           const newTimers = { ...prevTimers };
           
-          // Only decrement the active lane's timer
           if (newTimers[activeLane] > 0) {
             newTimers[activeLane] -= 1;
             
-            // If the active lane's timer reaches zero, find the next lane with highest density
             if (newTimers[activeLane] === 0) {
-              // Find the next lane with the highest remaining time
+              // Add the current lane to cleared lanes
+              setClearedLanes(prev => [...prev, activeLane]);
+              
+              // Show notification for cleared lane
+              setNotification({
+                lane: activeLane,
+                message: `${activeLane} lane signal cleared!`
+              });
+              
+              // Delete the uploaded image for the cleared lane
+              setUploadedImages(prev => {
+                const newImages = { ...prev };
+                delete newImages[activeLane];
+                return newImages;
+              });
+              
+              // Find the next lane with the highest remaining time from original durations
               const remainingLanes = Object.entries(originalDurations)
-                .filter(([lane, time]) => lane !== activeLane && time > 0)
+                .filter(([lane, time]) => 
+                  lane !== activeLane && 
+                  time > 0 && 
+                  !clearedLanes.includes(lane)
+                )
                 .sort((a, b) => b[1] - a[1]);
               
+              console.log("Remaining lanes after clearing:", activeLane, remainingLanes);
+              
               if (remainingLanes.length > 0) {
-                // Set the next lane as active and turn its light green
                 const nextLane = remainingLanes[0][0];
                 setActiveLane(nextLane);
                 
-                // Update traffic lights
                 setTrafficLights(prev => {
                   const updated = { ...prev };
                   updated[activeLane] = "red";
@@ -146,12 +189,16 @@ const TrafficControl = () => {
                   return updated;
                 });
                 
-                // Set the timer for the next active lane
                 newTimers[nextLane] = originalDurations[nextLane];
+                
+                console.log(`Next lane activated: ${nextLane} with duration: ${originalDurations[nextLane]}`);
               } else {
-                // All timers are zero, stop the timer
                 setTimerActive(false);
                 setActiveLane(null);
+                
+                setNotification({
+                  message: "All lanes have been processed!"
+                });
               }
             }
           }
@@ -166,7 +213,18 @@ const TrafficControl = () => {
         clearInterval(interval);
       }
     };
-  }, [timers, timerActive, activeLane, originalDurations]);
+  }, [timers, timerActive, activeLane, originalDurations, clearedLanes]);
+
+  // Auto-hide notification after 3 seconds
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   return (
     <div className="traffic-control-container">
@@ -267,6 +325,14 @@ const TrafficControl = () => {
             <div className="api-status error">
               <span className="status-icon">⚠️</span>
               <span className="status-text">{errorMessage}</span>
+            </div>
+          )}
+          
+          {/* Lane Cleared Notification */}
+          {notification && (
+            <div className="lane-notification">
+              <span className="notification-icon">🚦</span>
+              <span className="notification-text">{notification.message}</span>
             </div>
           )}
         </div>
