@@ -204,7 +204,7 @@ def upload_images():
 
         response = jsonify({
             "status": "success",
-            "signal_order": signal_order,  # Renamed to match frontend expectations
+            "sorted_lanes": signal_order,  # Changed key from "signal_order" to "sorted_lanes"
             "lane_durations": lane_durations,
             "lane_densities": {lane: round(density, 2) for lane, density in lane_densities.items()}
         })
