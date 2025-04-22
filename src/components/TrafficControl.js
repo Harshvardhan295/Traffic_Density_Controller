@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./TrafficControl.css";
 
+const BASE_URL = "https://traffic-density-controller.onrender.com";
+
 const TrafficControl = () => {
   const lanes = ["North", "East", "South", "West"];
   const [uploadedImages, setUploadedImages] = useState({});
@@ -57,30 +59,16 @@ const TrafficControl = () => {
     try {
       setApiStatus("loading");
       
-      // Use the correct API endpoint URL - try both localhost and 127.0.0.1
-      let response;
-      try {
-        response = await fetch("http://localhost:5000/upload", {
-          method: "POST",
-          body: formData,
-          headers: {
-            'Accept': 'application/json',
-          },
-          mode: 'cors',
-          credentials: 'omit'
-        });
-      } catch (error) {
-        console.log("Failed to connect to localhost, trying 127.0.0.1...");
-        response = await fetch("http://127.0.0.1:5000/upload", {
-          method: "POST",
-          body: formData,
-          headers: {
-            'Accept': 'application/json',
-          },
-          mode: 'cors',
-          credentials: 'omit'
-        });
-      }
+      // Use the correct API endpoint URL
+      const response = await fetch(`${BASE_URL}/upload`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+        },
+        mode: 'cors',
+        credentials: 'omit'
+      });
 
       if (!response.ok) {
         throw new Error(`Server responded with status: ${response.status}`);
