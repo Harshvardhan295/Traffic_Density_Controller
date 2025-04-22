@@ -13,10 +13,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-# Configure CORS to allow requests from the frontend
-CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"], "allow_headers": ["Content-Type", "Accept"]}})
-# Allow only your Netlify domain
-CORS(app, resources={r"/*": {"origins": "https://traffic-density-controller.netlify.app"}})
+CORS(app, resources={r"/*": {
+    "origins": ["https://traffic-density-controller.netlify.app"],
+    "methods": ["GET", "POST", "OPTIONS"],
+    "allow_headers": ["Content-Type", "Accept"]
+}})
 
 # Configure upload folder
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -119,7 +120,7 @@ def upload_images():
     if request.method == "OPTIONS":
         # Handle preflight request
         response = jsonify({"status": "ok"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Origin', 'https://traffic-density-controller.netlify.app')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Accept')
         response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
         return response, 204
