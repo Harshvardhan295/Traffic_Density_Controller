@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: traffic-density-controller
+    runtime: python  # ✅ Defines this is a Python service
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHONUNBUFFERED
+        value: 1
+    autoDeploy: true
