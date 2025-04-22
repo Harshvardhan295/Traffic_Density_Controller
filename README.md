@@ -31,7 +31,7 @@ This application takes **uploaded images of four road lanes** — North, South, 
 | **ML Model** | YOLO (Object Detection) |
 
 ## 📽️ Demo
-A demo video showcasing the app's functionality can be found [here](#) *(Link to video or description where to find it)*.
+A demo video showcasing the app's functionality can be found [here](https://www.linkedin.com/posts/harshvardhankhajuria_machinelearning-trafficmanagement-smartcities-activity-7320398261159182338-hik_?utm_source=share&utm_medium=member_desktop&rcm=ACoAADJrNM4B9PWPX87eRi0bQhtDvSYCyQwwmqI)
 
 ## 📋 Prerequisites
 
