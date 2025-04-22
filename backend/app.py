@@ -213,7 +213,7 @@ def upload_images():
         })
         
         # Add CORS headers to the response
-        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Origin', 'https://traffic-density-controller.netlify.app')
         return response
         
     except Exception as e:
