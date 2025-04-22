@@ -8,19 +8,19 @@ This application takes **uploaded images of four road lanes** — North, South, 
 
 ## 👨‍💻 Developed By
 
-- Harsh Vardhan Khajuria  
+- Harsh Vardhan Khajuria
 - Sarthak Ghavghave
 
 ## 🧠 Core Features
 
 - Upload images representing each lane's traffic status.
 - YOLO model detects vehicle count per image.
-- Lanes are sorted by density and signal times are allocated accordingly:
-  - 1st (highest density): 100 seconds  
-  - 2nd: 75 seconds  
-  - 3rd: 45 seconds  
+- Lanes are sorted by density, and signal times are allocated accordingly:
+  - 1st (highest density): 100 seconds
+  - 2nd: 75 seconds
+  - 3rd: 45 seconds
   - 4th: 25 seconds
-- Frontend UI to visualize signal change logic.
+- Frontend UI visualizes the signal change logic and progression.
 
 ## 🛠️ Tech Stack
 
@@ -31,68 +31,70 @@ This application takes **uploaded images of four road lanes** — North, South, 
 | **ML Model** | YOLO (Object Detection) |
 
 ## 📽️ Demo
+A demo video showcasing the app's functionality can be found [here](#) *(Link to video or description where to find it)*.
 
-A fast-forwarded demo video showcasing the app's functionality is available [here](#) *(link in LinkedIn post or attach in repo if uploading video)*.
+## 📋 Prerequisites
+
+Before you begin, ensure you have the following installed:
+- Python (3.8 or later recommended)
+- Node.js and npm (or yarn)
+- Git
 
 ## 🧪 How to Run the Project
 
-Follow the steps below to set up and run the project locally.
+Follow these steps to set up and run the project locally:
 
----
+1.  **Clone the Repository**
+    ```bash
+    git clone git clone https://github.com/Harshvardhan295/Traffic_Density_Controller.git # Replace with your repo URL
+    cd traffic-density-controller
+    ```
 
-### 1. **Clone the Repository**
+2.  **Set Up and Start the Backend (Flask + YOLO)**
+    ```bash
+    cd backend
 
-```bash
-git clone https://github.com/your-username/traffic-density-controller.git
-cd traffic-density-controller
+    # Create and activate a virtual environment
+    python -m venv venv
+    # On Windows:
+    .\venv\Scripts\activate
+    # On macOS/Linux:
+    # source venv/bin/activate
 
-2. Start the Backend (Flask + YOLO)
+    # Install Python dependencies
+    pip install -r requirements.txt
 
-cd backend
+    # Start the Flask server
+    python app.py
+    ```
+    The backend should now be running at `http://localhost:5000`. Keep this terminal open.
 
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate         # On Windows: venv\Scripts\activate
+3.  **Set Up and Start the Frontend (React)**
+    Open a **new terminal** window/tab in the `traffic-density-controller` root directory.
+    ```bash
+    cd frontend
 
-# Install Python dependencies
-pip install -r requirements.txt
+    # Install npm dependencies
+    npm install # or yarn install
 
-# Start the Flask server
-python app.py
-The backend should start running at: http://localhost:5000
+    # Start the React development server
+    npm start # or yarn start
+    ```
+    The frontend should open automatically in your browser at `http://localhost:3000`.
 
-3. Start the Frontend (React)
-Open a new terminal window/tab, then:
+4.  **Using the Application**
+    -   Ensure both the backend (`localhost:5000`) and frontend (`localhost:3000`) are running.
+    -   Open `http://localhost:3000` in your web browser.
+    -   Upload images for all four lanes (North, South, East, West). You can use your own images or find sample images.
+    -   Click the "Sort and Start Signal" button.
+    -   The application will:
+        -   Send images to the backend for analysis.
+        -   Detect vehicle density using the YOLO model.
+        -   Sort lanes based on density.
+        -   Assign signal durations (100s → 75s → 45s → 25s).
+        -   Display the signal progression visually on the frontend.
 
+## 📌 Notes
 
-cd frontend
-
-# Install npm dependencies
-npm install
-
-# Start the React app
-npm start
-The frontend will run at: http://localhost:3000
-
-4. Usage Instructions
-On the web interface, upload images for all four lanes (North, South, East, West).
-
-Click the "Sort and Start Signal" button.
-
-The ML model (YOLO) will detect traffic density in each image.
-
-The application will:
-
-Sort lanes by traffic density.
-
-Assign signal durations (100s → 75s → 45s → 25s) accordingly.
-
-Display signal progression on the frontend.
-
-📌 Notes
-1. Ensure both backend (localhost:5000) and frontend (localhost:3000) are running simultaneously.
-
-2. You can test with your own images or sample traffic images in the project directory.
-
-3. For demo purposes, signal durations can be shortened in the frontend timer logic.
-
+-   For testing or demonstration, you might want to adjust the signal durations in the frontend code (`frontend/src/...`) for quicker cycles.
+-   Ensure the paths to any sample images used for testing are correct.

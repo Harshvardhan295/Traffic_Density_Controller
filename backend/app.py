@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 # Configure CORS to allow requests from the frontend
 CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"], "allow_headers": ["Content-Type", "Accept"]}})
+# Allow only your Netlify domain
+CORS(app, origins=["https://traffic-density-controller.netlify.app/"])
 
 # Configure upload folder
 base_dir = os.path.dirname(os.path.abspath(__file__))
